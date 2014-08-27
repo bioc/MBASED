@@ -1,0 +1,18 @@
+Package: MBASED
+Type: Package
+Title: Package containing functions for ASE analysis using
+        Meta-analysis Based Allele-Specific Expression Detection
+Version: 0.99.2
+Date: 2014-08-27
+Author: Oleg Mayba, Houston Gilbert
+Maintainer: Oleg Mayba <mayba.oleg@gene.com>
+Description: The package implements MBASED algorithm for detecting
+        allele-specific gene expression from RNA count data, where
+        allele counts at individual loci (SNVs) are integrated into a
+        gene-specific measure of ASE, and utilizes simulations to
+        appropriately assess the statistical significance of observed
+        ASE.
+biocViews: Sequencing, GeneExpression, Transcription
+Depends: RUnit, BiocGenerics, BiocParallel, GenomicRanges
+Suggests: BiocStyle
+License: Artistic-2.0
