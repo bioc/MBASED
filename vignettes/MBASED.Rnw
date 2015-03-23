@@ -234,7 +234,7 @@ mySample <- SummarizedExperiment(
       )
     )
   ),
-  rowData=mySNVs
+  rowRanges=mySNVs
 )
 
 ##example of use
@@ -251,13 +251,13 @@ names(assays(ASEresults_1s_haplotypesKnown))
 assays(ASEresults_1s_haplotypesKnown)$majorAlleleFrequency
 assays(ASEresults_1s_haplotypesKnown)$pValueASE
 assays(ASEresults_1s_haplotypesKnown)$pValueHeterogeneity
-rowData(ASEresults_1s_haplotypesKnown)
+rowRanges(ASEresults_1s_haplotypesKnown)
 names(exptData(ASEresults_1s_haplotypesKnown))
 class(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
 names(assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults))
 assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$allele1IsMajor
 assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$MAF
-rowData(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
+rowRanges(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
 
 ## define function to print out the summary of ASE results
 summarizeASEResults_1s <- function(MBASEDOutput) {
@@ -266,7 +266,7 @@ summarizeASEResults_1s <- function(MBASEDOutput) {
    pValueASE=assays(MBASEDOutput)$pValueASE[,1],  
    pValueHeterogeneity=assays(MBASEDOutput)$pValueHeterogeneity[,1]
   )   
-  lociOutputGR <- rowData(exptData(MBASEDOutput)$locusSpecificResults)
+  lociOutputGR <- rowRanges(exptData(MBASEDOutput)$locusSpecificResults)
   lociOutputGR$allele1IsMajor <- assays(exptData(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
   lociOutputGR$MAF <- assays(exptData(MBASEDOutput)$locusSpecificResults)$MAF[,1]
   lociOutputList <- split(lociOutputGR, factor(lociOutputGR$aseID, levels=unique(lociOutputGR$aseID))) 
@@ -452,7 +452,7 @@ isoSpecificExample <- SummarizedExperiment(
       )
     )
   ),
-  rowData=isoSpecificExampleSNVs
+  rowRanges=isoSpecificExampleSNVs
 )
 
 summarizeASEResults_1s(
@@ -547,7 +547,7 @@ myTumorNormalExample <- SummarizedExperiment(
       )
     )
   ),
-  rowData=mySNVs_2s
+  rowRanges=mySNVs_2s
 )
 
 ##example of use
@@ -564,13 +564,13 @@ names(assays(ASEresults_2s))
 assays(ASEresults_2s)$majorAlleleFrequencyDifference
 assays(ASEresults_2s)$pValueASE
 assays(ASEresults_2s)$pValueHeterogeneity
-rowData(ASEresults_2s)
+rowRanges(ASEresults_2s)
 names(exptData(ASEresults_2s))
 class(exptData(ASEresults_2s)$locusSpecificResults)
 names(assays(exptData(ASEresults_2s)$locusSpecificResults))
 assays(exptData(ASEresults_2s)$locusSpecificResults)$allele1IsMajor
 assays(exptData(ASEresults_2s)$locusSpecificResults)$MAFDifference
-rowData(exptData(ASEresults_2s)$locusSpecificResults)
+rowRanges(exptData(ASEresults_2s)$locusSpecificResults)
 
 ## define function to print out the summary of ASE results
 summarizeASEResults_2s <- function(MBASEDOutput) {
@@ -579,7 +579,7 @@ summarizeASEResults_2s <- function(MBASEDOutput) {
    pValueASE=assays(MBASEDOutput)$pValueASE[,1],  
    pValueHeterogeneity=assays(MBASEDOutput)$pValueHeterogeneity[,1]
   )   
-  lociOutputGR <- rowData(exptData(MBASEDOutput)$locusSpecificResults)
+  lociOutputGR <- rowRanges(exptData(MBASEDOutput)$locusSpecificResults)
   lociOutputGR$allele1IsMajor <- assays(exptData(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
   lociOutputGR$MAFDifference <- assays(exptData(MBASEDOutput)$locusSpecificResults)$MAFDifference[,1]
   lociOutputList <- split(lociOutputGR, factor(lociOutputGR$aseID, levels=unique(lociOutputGR$aseID))) 
@@ -650,7 +650,7 @@ summarizeASEResults_2s(
           )
         )
       ),
-      rowData=mySNV
+      rowRanges=mySNV
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -688,7 +688,7 @@ summarizeASEResults_2s(
           )
         )
       ),
-      rowData=mySNV
+      rowRanges=mySNV
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -726,7 +726,7 @@ summarizeASEResults_2s(
           )
         )
       ),
-      rowData=mySNV
+      rowRanges=mySNV
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -765,7 +765,7 @@ summarizeASEResults_2s(
           )
         )
       ),
-      rowData=mySNV
+      rowRanges=mySNV
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -896,7 +896,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -933,7 +933,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -983,7 +983,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -1062,7 +1062,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -1100,7 +1100,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,
@@ -1139,7 +1139,7 @@ summarizeASEResults_1s(
           )
         )
       ),
-      rowData=mySNVs
+      rowRanges=mySNVs
     ),
     isPhased=FALSE,
     numSim=10^6,

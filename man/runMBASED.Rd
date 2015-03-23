@@ -7,7 +7,7 @@ runMBASED(ASESummarizedExperiment, isPhased = FALSE, numSim = 0,
   BPPARAM = SerialParam())
 }
 \arguments{
-\item{ASESummarizedExperiment}{SummarizedExperiment object containing information on read counts to be used for ASE detection. Rows represent individual heterozygous loci (SNVs), while columns represent individual samples. There should be either one or two columns, depending on whether one- or two-sample analysis is to be performed. Joint analysis of multiple samples or replicates is currently not supported, and one-sample analysis of multiple samples must be done through independent series of calls to runMBASED(). Note that for two-sample analysis, only loci which are heterozygous in both samples must be supplied (this excludes, e.g., tumor-specific mutations in cases of tumor/normal comparisons). For two-sample analysis, it is assumed that the first column corresponds to 'sample1' and the second column to 'sample2' in the sample1-vs-sample2 comparison. This is important, since differential ASE assessment is not symmetric and sample1-vs-sample2 comparison may yield different results from sample2-vs-sample1 comparison (the relationship is set up by assuming that only instances of ASE greater in sample1 than in sample2 are of interest). assays(ASESummarizedExperiment) must contain matrices lociAllele1Counts and lociAllele2Counts of non-negative integers, containing counts of allele1 (e.g. reference) and allele2 (e.g. alternative) at individual loci. All supplied loci must have total read count (across both alleles) greater than 0 (in each of the two samples, in the case of two-sample analysis). Allele counts are not necessarily phased (see 'isPhased' argument below), so allele1 counts may not represent the same haplotype. assays(ASESummarizedExperiment) may also contain matrix lociAllele1CountsNoASEProbs with entries >0 and <1, containing probabilities of observing allele1-supporting reads at individual loci under conditions of no ASE (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0.5 (no pre-existing allelic bias at any locus in any sample). assays(ASESummarizedExperiment) may also contain matrix lociCountsDispersions with entries >=0 and <1, containing dispersion parameters of beta-binomial read count distribution at individual loci (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0 (read count-generating distribution at each locus in each sample is binomial). Any other matrices in assays(ASESummarizedExperiment) are ignored by MBASED. rowData(ASESummarizedExperiment) must be supplied by the user, containing additional information about SNVs, including a required column 'aseID', specifying for each locus the unique unit of expression that it belongs to (e.g., gene; must be non-NA). MBASED uses names(rowData(ASESummarizedExperiment)), when specified, to give a unique identifier to each SNV; if no names are provided, the SNVs are labeled 'locus1', 'locus2', ..., in the row order.}
+\item{ASESummarizedExperiment}{SummarizedExperiment object containing information on read counts to be used for ASE detection. Rows represent individual heterozygous loci (SNVs), while columns represent individual samples. There should be either one or two columns, depending on whether one- or two-sample analysis is to be performed. Joint analysis of multiple samples or replicates is currently not supported, and one-sample analysis of multiple samples must be done through independent series of calls to runMBASED(). Note that for two-sample analysis, only loci which are heterozygous in both samples must be supplied (this excludes, e.g., tumor-specific mutations in cases of tumor/normal comparisons). For two-sample analysis, it is assumed that the first column corresponds to 'sample1' and the second column to 'sample2' in the sample1-vs-sample2 comparison. This is important, since differential ASE assessment is not symmetric and sample1-vs-sample2 comparison may yield different results from sample2-vs-sample1 comparison (the relationship is set up by assuming that only instances of ASE greater in sample1 than in sample2 are of interest). assays(ASESummarizedExperiment) must contain matrices lociAllele1Counts and lociAllele2Counts of non-negative integers, containing counts of allele1 (e.g. reference) and allele2 (e.g. alternative) at individual loci. All supplied loci must have total read count (across both alleles) greater than 0 (in each of the two samples, in the case of two-sample analysis). Allele counts are not necessarily phased (see 'isPhased' argument below), so allele1 counts may not represent the same haplotype. assays(ASESummarizedExperiment) may also contain matrix lociAllele1CountsNoASEProbs with entries >0 and <1, containing probabilities of observing allele1-supporting reads at individual loci under conditions of no ASE (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0.5 (no pre-existing allelic bias at any locus in any sample). assays(ASESummarizedExperiment) may also contain matrix lociCountsDispersions with entries >=0 and <1, containing dispersion parameters of beta-binomial read count distribution at individual loci (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0 (read count-generating distribution at each locus in each sample is binomial). Any other matrices in assays(ASESummarizedExperiment) are ignored by MBASED. rowRanges(ASESummarizedExperiment) must be supplied by the user, containing additional information about SNVs, including a required column 'aseID', specifying for each locus the unique unit of expression that it belongs to (e.g., gene; must be non-NA). MBASED uses names(rowRanges(ASESummarizedExperiment)), when specified, to give a unique identifier to each SNV; if no names are provided, the SNVs are labeled 'locus1', 'locus2', ..., in the row order.}
 
 \item{isPhased}{specifies whether the true haplotypes are known, in which case the lociAllele1Counts are assumed to represent allelic counts along the same haplotype (and the same is true of lociAllele2Counts). Must be either TRUE or FALSE (DEFAULT).}
 
@@ -79,7 +79,7 @@ mySE_TumorVsNormal <- SummarizedExperiment(
             )
          )
     ),
-     rowData=mySNVs
+     rowRanges=mySNVs
 )
 twoSampleAnalysisTumorVsNormal <- runMBASED(
     ASESummarizedExperiment=mySE_TumorVsNormal,
@@ -87,7 +87,7 @@ twoSampleAnalysisTumorVsNormal <- runMBASED(
      BPPARAM=SerialParam(),
      isPhased=FALSE
 )
-rowData(twoSampleAnalysisTumorVsNormal)
+rowRanges(twoSampleAnalysisTumorVsNormal)
 assays(twoSampleAnalysisTumorVsNormal)$majorAlleleFrequencyDifference
 assays(twoSampleAnalysisTumorVsNormal)$pValueASE
 assays(twoSampleAnalysisTumorVsNormal)$pValueHeterogeneity
@@ -103,7 +103,7 @@ mySE_NormalVsTumor <- SummarizedExperiment(
         return(modifiedMat)
     }),
     colData=colData(mySE_TumorVsNormal)[2:1,],
-    rowData=rowData(mySE_TumorVsNormal)
+    rowRanges=rowRanges(mySE_TumorVsNormal)
 )
 names(assays(mySE_NormalVsTumor )) <- names(assays(mySE_TumorVsNormal))
 twoSampleAnalysisNormalVsTumor <- runMBASED(
@@ -112,7 +112,7 @@ twoSampleAnalysisNormalVsTumor <- runMBASED(
      BPPARAM=SerialParam(),
      isPhased=FALSE
 )
-rowData(twoSampleAnalysisNormalVsTumor)
+rowRanges(twoSampleAnalysisNormalVsTumor)
 assays(twoSampleAnalysisNormalVsTumor)$majorAlleleFrequencyDifference
 assays(twoSampleAnalysisNormalVsTumor)$pValueASE
 assays(twoSampleAnalysisNormalVsTumor)$pValueHeterogeneity
@@ -127,7 +127,7 @@ mySE_Tumor <- SummarizedExperiment(
         return(modifiedMat)
     }),
     colData=colData(mySE_TumorVsNormal)[1,],
-    rowData=rowData(mySE_TumorVsNormal)
+    rowRanges=rowRanges(mySE_TumorVsNormal)
 )
 names(assays(mySE_Tumor)) <- names(assays(mySE_TumorVsNormal))
 oneSampleAnalysisTumor <- runMBASED(
@@ -136,7 +136,7 @@ oneSampleAnalysisTumor <- runMBASED(
      BPPARAM=SerialParam(),
      isPhased=FALSE
 )
-rowData(oneSampleAnalysisTumor)
+rowRanges(oneSampleAnalysisTumor)
 assays(oneSampleAnalysisTumor)$majorAlleleFrequency
 assays(oneSampleAnalysisTumor)$pValueASE
 assays(oneSampleAnalysisTumor)$pValueHeterogeneity
@@ -150,7 +150,7 @@ mySE_Normal <- SummarizedExperiment(
         return(modifiedMat)
     }),
     colData=colData(mySE_TumorVsNormal)[1,],
-    rowData=rowData(mySE_TumorVsNormal)
+    rowRanges=rowRanges(mySE_TumorVsNormal)
 )
 names(assays(mySE_Normal)) <- names(assays(mySE_TumorVsNormal))
 oneSampleAnalysisNormal <- runMBASED(
@@ -159,7 +159,7 @@ oneSampleAnalysisNormal <- runMBASED(
      BPPARAM=SerialParam(),
      isPhased=FALSE
 )
-rowData(oneSampleAnalysisNormal)
+rowRanges(oneSampleAnalysisNormal)
 assays(oneSampleAnalysisNormal)$majorAlleleFrequency
 assays(oneSampleAnalysisNormal)$pValueASE
 assays(oneSampleAnalysisNormal)$pValueHeterogeneity
