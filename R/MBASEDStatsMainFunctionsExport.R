@@ -1,11 +1,11 @@
 #' Main function that implements MBASED.  
 #'
-#' @param ASESummarizedExperiment SummarizedExperiment object containing information on read counts to be used for ASE detection. Rows represent individual heterozygous loci (SNVs), while columns represent individual samples. There should be either one or two columns, depending on whether one- or two-sample analysis is to be performed. Joint analysis of multiple samples or replicates is currently not supported, and one-sample analysis of multiple samples must be done through independent series of calls to runMBASED(). Note that for two-sample analysis, only loci which are heterozygous in both samples must be supplied (this excludes, e.g., tumor-specific mutations in cases of tumor/normal comparisons). For two-sample analysis, it is assumed that the first column corresponds to 'sample1' and the second column to 'sample2' in the sample1-vs-sample2 comparison. This is important, since differential ASE assessment is not symmetric and sample1-vs-sample2 comparison may yield different results from sample2-vs-sample1 comparison (the relationship is set up by assuming that only instances of ASE greater in sample1 than in sample2 are of interest). assays(ASESummarizedExperiment) must contain matrices lociAllele1Counts and lociAllele2Counts of non-negative integers, containing counts of allele1 (e.g. reference) and allele2 (e.g. alternative) at individual loci. All supplied loci must have total read count (across both alleles) greater than 0 (in each of the two samples, in the case of two-sample analysis). Allele counts are not necessarily phased (see 'isPhased' argument below), so allele1 counts may not represent the same haplotype. assays(ASESummarizedExperiment) may also contain matrix lociAllele1CountsNoASEProbs with entries >0 and <1, containing probabilities of observing allele1-supporting reads at individual loci under conditions of no ASE (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0.5 (no pre-existing allelic bias at any locus in any sample). assays(ASESummarizedExperiment) may also contain matrix lociCountsDispersions with entries >=0 and <1, containing dispersion parameters of beta-binomial read count distribution at individual loci (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0 (read count-generating distribution at each locus in each sample is binomial). Any other matrices in assays(ASESummarizedExperiment) are ignored by MBASED. rowRanges(ASESummarizedExperiment) must be supplied by the user, containing additional information about SNVs, including a required column 'aseID', specifying for each locus the unique unit of expression that it belongs to (e.g., gene; must be non-NA). MBASED uses names(rowRanges(ASESummarizedExperiment)), when specified, to give a unique identifier to each SNV; if no names are provided, the SNVs are labeled 'locus1', 'locus2', ..., in the row order. 
+#' @param ASESummarizedExperiment RangedSummarizedExperiment object containing information on read counts to be used for ASE detection. Rows represent individual heterozygous loci (SNVs), while columns represent individual samples. There should be either one or two columns, depending on whether one- or two-sample analysis is to be performed. Joint analysis of multiple samples or replicates is currently not supported, and one-sample analysis of multiple samples must be done through independent series of calls to runMBASED(). Note that for two-sample analysis, only loci which are heterozygous in both samples must be supplied (this excludes, e.g., tumor-specific mutations in cases of tumor/normal comparisons). For two-sample analysis, it is assumed that the first column corresponds to 'sample1' and the second column to 'sample2' in the sample1-vs-sample2 comparison. This is important, since differential ASE assessment is not symmetric and sample1-vs-sample2 comparison may yield different results from sample2-vs-sample1 comparison (the relationship is set up by assuming that only instances of ASE greater in sample1 than in sample2 are of interest). assays(ASESummarizedExperiment) must contain matrices lociAllele1Counts and lociAllele2Counts of non-negative integers, containing counts of allele1 (e.g. reference) and allele2 (e.g. alternative) at individual loci. All supplied loci must have total read count (across both alleles) greater than 0 (in each of the two samples, in the case of two-sample analysis). Allele counts are not necessarily phased (see 'isPhased' argument below), so allele1 counts may not represent the same haplotype. assays(ASESummarizedExperiment) may also contain matrix lociAllele1CountsNoASEProbs with entries >0 and <1, containing probabilities of observing allele1-supporting reads at individual loci under conditions of no ASE (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0.5 (no pre-existing allelic bias at any locus in any sample). assays(ASESummarizedExperiment) may also contain matrix lociCountsDispersions with entries >=0 and <1, containing dispersion parameters of beta-binomial read count distribution at individual loci (which may differ for individual samples in the two-sample analysis). If this matrix is not provided, it is constructed such that every entry in the matrix is set to 0 (read count-generating distribution at each locus in each sample is binomial). Any other matrices in assays(ASESummarizedExperiment) are ignored by MBASED. rowRanges(ASESummarizedExperiment) must be supplied by the user, containing additional information about SNVs, including a required column 'aseID', specifying for each locus the unique unit of expression that it belongs to (e.g., gene; must be non-NA). MBASED uses names(rowRanges(ASESummarizedExperiment)), when specified, to give a unique identifier to each SNV; if no names are provided, the SNVs are labeled 'locus1', 'locus2', ..., in the row order. 
 #' @param isPhased specifies whether the true haplotypes are known, in which case the lociAllele1Counts are assumed to represent allelic counts along the same haplotype (and the same is true of lociAllele2Counts). Must be either TRUE or FALSE (DEFAULT).
 #' @param numSim number of simulations to perform to estimate statistical signficance of observed ASE. Must be a non-negative integer. If set to 0 (DEFAULT), no simulations are performed and nominal p-values are reported. 
 #' @param BPPARAM argument to be passed to function bplapply(), when parallel achitecture is used to speed up simulations (parallelization is done over aseIDs).  DEFAULT: SerialParam() (no parallelization).
 #'
-#' @return SummarizedExperiment object with rows representing individual aseIDs (genes) and a single column. assays(returnObject) includes single-column matrices 'majorAlleleFrequency' (1-sample analysis only), 'majorAlleleFrequencyDifference' (2-sample analysis only), 'pValueASE' (unadjusted ASE p-value), 'pValueHeterogeneity' (unadjusted inter-loci variability p-value, set to NA for aseIDs with only 1 locus). Note that p-values are not adjusted for multiple hypothesis testing, and the users should carry out such an adjustment themselves, e.g. by employing the utilities in the multtest package. In addition, exptData(returnObject) is a list containing a SummarizedExperiment object names 'locusSpecificResults', with rows corresponding to individual loci (SNVs) and a single column, that provides information on locus-level MBASED analysis results. assays(exptData(returnObject)$locusSpecificResults) contains single-column matrices 'MAF' (estimate of allele frequency for gene-wide major allele at the locus, 1-sample analysis only), 'MAFDifference' (estimate of allele frequency difference for gene-wide major allele at the locus, 2-sample analysis only), and 'allele1IsMajor' (whether allele1 is assigned to major haplotype by MBASED).
+#' @return RangedSummarizedExperiment object with rows representing individual aseIDs (genes) and a single column. assays(returnObject) includes single-column matrices 'majorAlleleFrequency' (1-sample analysis only), 'majorAlleleFrequencyDifference' (2-sample analysis only), 'pValueASE' (unadjusted ASE p-value), 'pValueHeterogeneity' (unadjusted inter-loci variability p-value, set to NA for aseIDs with only 1 locus). Note that p-values are not adjusted for multiple hypothesis testing, and the users should carry out such an adjustment themselves, e.g. by employing the utilities in the multtest package. In addition, metadata(returnObject) is a list containing a RangedSummarizedExperiment object names 'locusSpecificResults', with rows corresponding to individual loci (SNVs) and a single column, that provides information on locus-level MBASED analysis results. assays(metadata(returnObject)$locusSpecificResults) contains single-column matrices 'MAF' (estimate of allele frequency for gene-wide major allele at the locus, 1-sample analysis only), 'MAFDifference' (estimate of allele frequency difference for gene-wide major allele at the locus, 2-sample analysis only), and 'allele1IsMajor' (whether allele1 is assigned to major haplotype by MBASED).
 #'
 #' @export
 #'
@@ -19,7 +19,7 @@
 #'     allele2=c('T', 'C', 'T', 'G')    
 #' )
 #' names(mySNVs) <- paste0('SNV', 1:4)
-#' ## SummarizedExperiment object with data to run tumor vs. normal comparison
+#' ## RangedSummarizedExperiment object with data to run tumor vs. normal comparison
 #' mySE_TumorVsNormal <- SummarizedExperiment(
 #'      assays=list(
 #'         lociAllele1Counts=matrix(
@@ -79,8 +79,8 @@
 #' assays(twoSampleAnalysisTumorVsNormal)$majorAlleleFrequencyDifference
 #' assays(twoSampleAnalysisTumorVsNormal)$pValueASE
 #' assays(twoSampleAnalysisTumorVsNormal)$pValueHeterogeneity
-#' assays(exptData(twoSampleAnalysisTumorVsNormal)$locusSpecificResults)$MAFDifference
-#' assays(exptData(twoSampleAnalysisTumorVsNormal)$locusSpecificResults)$allele1IsMajor
+#' assays(metadata(twoSampleAnalysisTumorVsNormal)$locusSpecificResults)$MAFDifference
+#' assays(metadata(twoSampleAnalysisTumorVsNormal)$locusSpecificResults)$allele1IsMajor
 #' 
 #' ## exchanging the order of the columns will allow us to run normal vs. tumor comparison
 #' ## Note that while results are the same for single-locus gene1, they differ for multi-locus gene2
@@ -104,8 +104,8 @@
 #' assays(twoSampleAnalysisNormalVsTumor)$majorAlleleFrequencyDifference
 #' assays(twoSampleAnalysisNormalVsTumor)$pValueASE
 #' assays(twoSampleAnalysisNormalVsTumor)$pValueHeterogeneity
-#' assays(exptData(twoSampleAnalysisNormalVsTumor)$locusSpecificResults)$MAFDifference
-#' assays(exptData(twoSampleAnalysisNormalVsTumor)$locusSpecificResults)$allele1IsMajor
+#' assays(metadata(twoSampleAnalysisNormalVsTumor)$locusSpecificResults)$MAFDifference
+#' assays(metadata(twoSampleAnalysisNormalVsTumor)$locusSpecificResults)$allele1IsMajor
 #' 
 #' ## we can also do separate one-sample analysis on tumor and normal samples
 #' mySE_Tumor <- SummarizedExperiment(
@@ -128,8 +128,8 @@
 #' assays(oneSampleAnalysisTumor)$majorAlleleFrequency
 #' assays(oneSampleAnalysisTumor)$pValueASE
 #' assays(oneSampleAnalysisTumor)$pValueHeterogeneity
-#' assays(exptData(oneSampleAnalysisTumor)$locusSpecificResults)$MAF
-#' assays(exptData(oneSampleAnalysisTumor)$locusSpecificResults)$allele1IsMajor
+#' assays(metadata(oneSampleAnalysisTumor)$locusSpecificResults)$MAF
+#' assays(metadata(oneSampleAnalysisTumor)$locusSpecificResults)$allele1IsMajor
 #' 
 #' mySE_Normal <- SummarizedExperiment(
 #'     assays=lapply(names(assays(mySE_TumorVsNormal)), function(matName) {
@@ -151,8 +151,8 @@
 #' assays(oneSampleAnalysisNormal)$majorAlleleFrequency
 #' assays(oneSampleAnalysisNormal)$pValueASE
 #' assays(oneSampleAnalysisNormal)$pValueHeterogeneity
-#' assays(exptData(oneSampleAnalysisNormal)$locusSpecificResults)$MAF
-#' assays(exptData(oneSampleAnalysisNormal)$locusSpecificResults)$allele1IsMajor
+#' assays(metadata(oneSampleAnalysisNormal)$locusSpecificResults)$MAF
+#' assays(metadata(oneSampleAnalysisNormal)$locusSpecificResults)$allele1IsMajor
 #' }
 #' 
 runMBASED <- function (
@@ -375,7 +375,7 @@ runMBASED <- function (
     outputSummarizedExperiment <- SummarizedExperiment(
         assays=aseIDSpecificResults,
         rowRanges <- split(locusInfo, factor(locusInfo$aseID, levels=aseIDsUnique)),
-        exptData=SimpleList(
+        metadata=list(
             locusSpecificResults=SummarizedExperiment(
                 assays=lociSpecificResults,
                 rowRanges <- locusInfo

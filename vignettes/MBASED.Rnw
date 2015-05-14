@@ -159,17 +159,17 @@ examples of advanced usage, including adjusting for pre-existing allelic bias
 and extra-binomial dispersion in the data.
 
 \subsection{Input/Output format}
-The input and output of runMBASED() function are SummarizedExperiment
-objects, defined in R package 'GenomicRanges'. Please see the
-SummarizedExperiment help page for details. Briefly, the input object
+The input and output of runMBASED() function are RangedSummarizedExperiment
+objects, defined in R package 'SummarizedExperiment'. Please see the
+RangedSummarizedExperiment help page for details. Briefly, the input object
 has rows corresponding to individual SNVs and columns corresponding to
 samples. In 1-sample analysis, there is a single column. In 2-sample
 analysis, there are 2 columns, one for each sample, with first column
 corresponding to `sample1' and second column corresponding to
 `sample2' in the language of section \ref{sec:2sample}. The output is also a
-SummarizedExperiment object, with rows corresponding to individual
+RangedSummarizedExperiment object, with rows corresponding to individual
 aseIDs and a single column. MBASED output at the level of individual
-SNV is stored in the exptData of the output object. The examples
+SNV is stored as metadata on the output object. The examples
 below will illustrate the usage.
 
 \subsection{1-sample analysis}
@@ -214,7 +214,7 @@ mySNVs <- GRanges(
   allele2=c('T', 'C', 'T', 'G')	
 )
 names(mySNVs) <- c('gene1_SNV1', 'gene2_SNV1', 'gene2_SNV2', 'gene2_SNV3')
-## create input SummarizedExperiment object
+## create input RangedSummarizedExperiment object
 mySample <- SummarizedExperiment(
   assays=list(
     lociAllele1Counts=matrix(
@@ -252,12 +252,12 @@ assays(ASEresults_1s_haplotypesKnown)$majorAlleleFrequency
 assays(ASEresults_1s_haplotypesKnown)$pValueASE
 assays(ASEresults_1s_haplotypesKnown)$pValueHeterogeneity
 rowRanges(ASEresults_1s_haplotypesKnown)
-names(exptData(ASEresults_1s_haplotypesKnown))
-class(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
-names(assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults))
-assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$allele1IsMajor
-assays(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$MAF
-rowRanges(exptData(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
+names(metadata(ASEresults_1s_haplotypesKnown))
+class(metadata(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
+names(assays(metadata(ASEresults_1s_haplotypesKnown)$locusSpecificResults))
+assays(metadata(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$allele1IsMajor
+assays(metadata(ASEresults_1s_haplotypesKnown)$locusSpecificResults)$MAF
+rowRanges(metadata(ASEresults_1s_haplotypesKnown)$locusSpecificResults)
 
 ## define function to print out the summary of ASE results
 summarizeASEResults_1s <- function(MBASEDOutput) {
@@ -266,9 +266,9 @@ summarizeASEResults_1s <- function(MBASEDOutput) {
    pValueASE=assays(MBASEDOutput)$pValueASE[,1],  
    pValueHeterogeneity=assays(MBASEDOutput)$pValueHeterogeneity[,1]
   )   
-  lociOutputGR <- rowRanges(exptData(MBASEDOutput)$locusSpecificResults)
-  lociOutputGR$allele1IsMajor <- assays(exptData(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
-  lociOutputGR$MAF <- assays(exptData(MBASEDOutput)$locusSpecificResults)$MAF[,1]
+  lociOutputGR <- rowRanges(metadata(MBASEDOutput)$locusSpecificResults)
+  lociOutputGR$allele1IsMajor <- assays(metadata(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
+  lociOutputGR$MAF <- assays(metadata(MBASEDOutput)$locusSpecificResults)$MAF[,1]
   lociOutputList <- split(lociOutputGR, factor(lociOutputGR$aseID, levels=unique(lociOutputGR$aseID))) 
   return(
    list(
@@ -280,16 +280,16 @@ summarizeASEResults_1s <- function(MBASEDOutput) {
 summarizeASEResults_1s(ASEresults_1s_haplotypesKnown)
 @
 
-The output of \texttt{runMBASED()} is a SummarizedExperiment object
+The output of \texttt{runMBASED()} is a RangedSummarizedExperiment object
 with 3 single-column assay matrices. The rows of the matrices
 correspond to individual aseIDs, in our case `gene1' and
 `gene2'. The matrices are majorAlleleFrequency (MBASED estimate of
 gene-level MAF), pValueASE (the coresponding p-value), and
 pValueHeterogeneity (the inter-SNV variability p-values). Note that heterogeneity p-value is \texttt{NA} for gene1,
 since this gene
-only has 1 tested SNV. exptData slot of the return object contains a
+only has 1 tested SNV. The metadata slot of the return object contains a
 single element, `locusSpecificResults', which is a
-SummarizedExperiment object with information on MBASED results at the
+RangedSummarizedExperiment object with information on MBASED results at the
 level of individual SNV. The assay matrices specify whether at a given
 locus allele1 belongs to the major (gene-level) haplotype
 (`allele1IsMajor'), and what the allele frequency is at that SNV of
@@ -432,7 +432,7 @@ a part of that isoform.
 
 <<label=isoform_specific, eval=TRUE, echo=TRUE>>=
 isoSpecificExampleSNVs <- mySNVs[2:4,]	
-## create input SummarizedExperiment object
+## create input RangedSummarizedExperiment object
 isoSpecificExample <- SummarizedExperiment(
   assays=list(
     lociAllele1Counts=matrix(
@@ -521,7 +521,7 @@ mySNVs_2s <- GRanges(
   allele2=c('T', 'C', 'T', 'G', 'G')	
 )
 names(mySNVs_2s) <- c('gene1_SNV1', 'gene2_SNV1', 'gene2_SNV2', 'gene2_SNV3', 'gene3_SNV1')
-## create input SummarizedExperiment object
+## create input RangedSummarizedExperiment object
 myTumorNormalExample <- SummarizedExperiment(
   assays=list(
     lociAllele1Counts=matrix(
@@ -565,12 +565,12 @@ assays(ASEresults_2s)$majorAlleleFrequencyDifference
 assays(ASEresults_2s)$pValueASE
 assays(ASEresults_2s)$pValueHeterogeneity
 rowRanges(ASEresults_2s)
-names(exptData(ASEresults_2s))
-class(exptData(ASEresults_2s)$locusSpecificResults)
-names(assays(exptData(ASEresults_2s)$locusSpecificResults))
-assays(exptData(ASEresults_2s)$locusSpecificResults)$allele1IsMajor
-assays(exptData(ASEresults_2s)$locusSpecificResults)$MAFDifference
-rowRanges(exptData(ASEresults_2s)$locusSpecificResults)
+names(metadata(ASEresults_2s))
+class(metadata(ASEresults_2s)$locusSpecificResults)
+names(assays(metadata(ASEresults_2s)$locusSpecificResults))
+assays(metadata(ASEresults_2s)$locusSpecificResults)$allele1IsMajor
+assays(metadata(ASEresults_2s)$locusSpecificResults)$MAFDifference
+rowRanges(metadata(ASEresults_2s)$locusSpecificResults)
 
 ## define function to print out the summary of ASE results
 summarizeASEResults_2s <- function(MBASEDOutput) {
@@ -579,9 +579,9 @@ summarizeASEResults_2s <- function(MBASEDOutput) {
    pValueASE=assays(MBASEDOutput)$pValueASE[,1],  
    pValueHeterogeneity=assays(MBASEDOutput)$pValueHeterogeneity[,1]
   )   
-  lociOutputGR <- rowRanges(exptData(MBASEDOutput)$locusSpecificResults)
-  lociOutputGR$allele1IsMajor <- assays(exptData(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
-  lociOutputGR$MAFDifference <- assays(exptData(MBASEDOutput)$locusSpecificResults)$MAFDifference[,1]
+  lociOutputGR <- rowRanges(metadata(MBASEDOutput)$locusSpecificResults)
+  lociOutputGR$allele1IsMajor <- assays(metadata(MBASEDOutput)$locusSpecificResults)$allele1IsMajor[,1]
+  lociOutputGR$MAFDifference <- assays(metadata(MBASEDOutput)$locusSpecificResults)$MAFDifference[,1]
   lociOutputList <- split(lociOutputGR, factor(lociOutputGR$aseID, levels=unique(lociOutputGR$aseID))) 
   return(
    list(
@@ -595,7 +595,7 @@ summarizeASEResults_2s(ASEresults_2s)
 @ 
 
 Analogous to 1-sample analysis, the output of \texttt{runMBASED()} for 2-sample
-analysis is a SummarizedExperiment object
+analysis is a RangedSummarizedExperiment object
 with 3 single-column assay matrices. The matrices are are similar to those in
 1-sample case, except our measure of ASE is the difference in major
 allele frequency between the two samples. For example, for a
@@ -869,7 +869,7 @@ no ASE under the reference allele bias described above. In contrast, gene1 shows
 overexpression of alternative allele, which may actually be seen as evidence \emph{for}
 ASE. MBASED allows one to specify the extent of pre-existing allelic
 bias by providing a corresponding matrix in the assays of the input
-SummarizedExperiment object. By default, MBASED assumes that the background (no ASE) allelic
+RangedSummarizedExperiment object. By default, MBASED assumes that the background (no ASE) allelic
 ratio is 50/50:
 
 <<label=example1s_refBias_no_adjustment, eval=TRUE, echo=TRUE>>=

@@ -2,7 +2,7 @@ Package: MBASED
 Type: Package
 Title: Package containing functions for ASE analysis using
         Meta-analysis Based Allele-Specific Expression Detection
-Version: 1.3.0
+Version: 1.3.1
 Date: 2014-08-27
 Author: Oleg Mayba, Houston Gilbert
 Maintainer: Oleg Mayba <mayba.oleg@gene.com>
@@ -13,6 +13,6 @@ Description: The package implements MBASED algorithm for detecting
         appropriately assess the statistical significance of observed
         ASE.
 biocViews: Sequencing, GeneExpression, Transcription
-Depends: RUnit, BiocGenerics, BiocParallel, GenomicRanges
+Depends: RUnit, BiocGenerics, BiocParallel, GenomicRanges, SummarizedExperiment
 Suggests: BiocStyle
 License: Artistic-2.0
