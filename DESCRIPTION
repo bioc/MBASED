@@ -2,7 +2,7 @@ Package: MBASED
 Type: Package
 Title: Package containing functions for ASE analysis using
         Meta-analysis Based Allele-Specific Expression Detection
-Version: 1.29.0
+Version: 1.30.0
 Date: 2014-08-27
 Author: Oleg Mayba, Houston Gilbert
 Maintainer: Oleg Mayba <mayba.oleg@gene.com>
